@@ -32,25 +32,17 @@ pnpm install
 
 2. **Configure environment variables**:
 
-Create `apps/backend/.env`:
+Copy `apps/backend/.env.example` to `apps/backend/.env` and set:
 
-```env
-AIRWALLEX_CLIENT_ID=
-AIRWALLEX_API_KEY=
-AIRWALLEX_ENV=sandbox
-AIRWALLEX_API_BASE_URL=https://demo-pacheckoutdemo.airwallex.com
-FRONTEND_BASE_URL=http://localhost:3000
-WEBHOOK_URL=http://localhost:3001/webhooks/airwallex
-PORT=3001
-```
+- **Airwallex** (optional): `AIRWALLEX_CLIENT_ID`, `AIRWALLEX_API_KEY`. If empty, the backend uses the dummy API (no authentication).
+- **Quaderno** (optional): `QUADERNO_API_KEY`, `QUADERNO_API_BASE_URL`, `QUADERNO_FROM_COUNTRY`, `QUADERNO_FROM_POSTAL_CODE`. If `QUADERNO_API_KEY` is empty, a flat 10% tax fallback is used.
+- **App**: `FRONTEND_BASE_URL`, `WEBHOOK_URL`, `PORT`.
 
 Create `apps/web/.env.local`:
 
 ```env
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 ```
-
-> **Note**: If `AIRWALLEX_CLIENT_ID` and `AIRWALLEX_API_KEY` are not provided, the backend will use the dummy API (no authentication required).
 
 ## Development
 
@@ -75,4 +67,28 @@ pnpm build
 
 ```bash
 pnpm lint
+```
+
+## Formatting
+
+Format the whole repo (Prettier):
+
+```bash
+pnpm format
+```
+
+Check formatting without writing (for CI):
+
+```bash
+pnpm format:check
+```
+
+You can also run `format` or `format:check` in individual workspaces, e.g. `pnpm --filter @poc/backend format:check`.
+
+## CI
+
+Run format check, lint, and build:
+
+```bash
+pnpm ci:check
 ```

@@ -6,7 +6,7 @@ Shared TypeScript types and constants used across the monorepo.
 
 - `Book` - Book entity
 - `CartItem` - Cart item with book and quantity
-- `PricingBreakdown` - Pricing calculation result
+- `PricingBreakdown` - Pricing calculation result (subtotal, tax, shipping, total, taxRate)
 
 ## Constants
 
@@ -17,4 +17,11 @@ Shared TypeScript types and constants used across the monorepo.
 
 ```bash
 pnpm build
+```
+
+## Formatting
+
+```bash
+pnpm format        # format src
+pnpm format:check  # check only (CI)
 ```

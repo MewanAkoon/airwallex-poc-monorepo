@@ -10,7 +10,7 @@ Next.js frontend for the bookstore POC.
 pnpm install
 ```
 
-2. Create `.env.local` file:
+2. Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
@@ -29,7 +29,20 @@ pnpm build
 pnpm start
 ```
 
+## Formatting
+
+```bash
+pnpm format        # format app files
+pnpm format:check  # check only (CI)
+```
+
+## Linting
+
+```bash
+pnpm lint
+```
+
 ## Pages
 
 - `/` - Home page with book browsing
-- `/cart` - Shopping cart and checkout
+- `/cart` - Shopping cart, address, pricing summary, and checkout

@@ -1,6 +1,6 @@
 # Backend - NestJS
 
-NestJS backend for Airwallex payment integration.
+NestJS backend for Airwallex payment integration, Quaderno tax calculation, and pricing/shipping.
 
 ## Setup
 
@@ -10,17 +10,7 @@ NestJS backend for Airwallex payment integration.
 pnpm install
 ```
 
-2. Create `.env` file:
-
-```env
-AIRWALLEX_CLIENT_ID=
-AIRWALLEX_API_KEY=
-AIRWALLEX_ENV=sandbox
-AIRWALLEX_API_BASE_URL=https://demo-pacheckoutdemo.airwallex.com
-FRONTEND_BASE_URL=http://localhost:3000
-WEBHOOK_URL=http://localhost:3001/webhooks/airwallex
-PORT=3001
-```
+2. Copy `.env.example` to `.env` and configure Airwallex, Quaderno, and app settings.
 
 ## Development
 
@@ -35,9 +25,22 @@ pnpm build
 pnpm start:prod
 ```
 
+## Formatting
+
+```bash
+pnpm format        # format src
+pnpm format:check  # check only (CI)
+```
+
+## Linting
+
+```bash
+pnpm lint
+```
+
 ## API Endpoints
 
-- `POST /payment-intent/pricing` - Calculate pricing breakdown
-- `POST /payment-intent/calculate-shipping` - Calculate shipping cost
+- `POST /payment-intent/pricing` - Calculate pricing (subtotal, tax, shipping, total)
+- `POST /payment-intent/shipping` - Calculate shipping cost
 - `POST /payment-intent` - Create payment intent
 - `POST /webhooks/airwallex` - Webhook endpoint

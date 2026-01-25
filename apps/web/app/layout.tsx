@@ -8,11 +8,7 @@ export const metadata: Metadata = {
   description: 'Bookstore payment proof of concept with Airwallex',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>

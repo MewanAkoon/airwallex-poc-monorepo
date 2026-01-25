@@ -36,14 +36,10 @@ export function CartItem({ item, onQuantityChange, onRemove }: CartItemProps) {
         <div className="flex-1 flex flex-col">
           <CardHeader className="p-0 pb-2">
             <CardTitle className="text-lg">{item.book.title}</CardTitle>
-            <CardDescription className="line-clamp-2">
-              {item.book.description}
-            </CardDescription>
+            <CardDescription className="line-clamp-2">{item.book.description}</CardDescription>
           </CardHeader>
           <CardContent className="p-0 flex-1 flex flex-col justify-between">
-            <div className="text-xl font-bold text-primary mb-3">
-              ${item.book.price.toFixed(2)}
-            </div>
+            <div className="text-xl font-bold text-primary mb-3">${item.book.price.toFixed(2)}</div>
             <div className="flex items-center gap-4 mt-auto">
               <div className="flex items-center gap-2 border rounded-md">
                 <Button

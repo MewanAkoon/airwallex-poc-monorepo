@@ -75,9 +75,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existingItem = prevCart.find((item) => item.book.id === book.id);
       if (existingItem) {
         return prevCart.map((item) =>
-          item.book.id === book.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+          item.book.id === book.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...prevCart, { book, quantity: 1 }];
@@ -90,9 +88,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.book.id === bookId ? { ...item, quantity } : item
-      )
+      prevCart.map((item) => (item.book.id === bookId ? { ...item, quantity } : item))
     );
   };
 
@@ -105,9 +101,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CartContext.Provider
-      value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart }}
-    >
+    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

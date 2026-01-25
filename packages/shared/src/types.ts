@@ -16,4 +16,6 @@ export interface PricingBreakdown {
   tax: number;
   shipping: number;
   total: number;
+  /** Tax rate as percentage (e.g. 8.875). Set when using Quaderno. */
+  taxRate?: number;
 }

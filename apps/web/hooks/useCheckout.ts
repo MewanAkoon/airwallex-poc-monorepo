@@ -9,10 +9,7 @@ import { ShippingAddress } from '@/components/ShippingAddressForm';
 export function useCheckout() {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleCheckout = async (
-    cart: CartItem[],
-    shippingAddress: ShippingAddress | null
-  ) => {
+  const handleCheckout = async (cart: CartItem[], shippingAddress: ShippingAddress | null) => {
     if (cart.length === 0) {
       toast.error('Cart is empty', {
         description: 'Please add items to your cart before checkout.',
@@ -30,22 +27,15 @@ export function useCheckout() {
     setIsProcessing(true);
 
     try {
-      // Initialize Airwallex
       await init({
         env: 'demo',
         enabledElements: ['payments'],
       });
 
-      // Create payment intent
       const response = await fetch(API_ENDPOINTS.PAYMENT_INTENT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cartItems: cart,
-          shippingAddress: shippingAddress,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartItems: cart, shippingAddress }),
       });
 
       if (!response.ok) {
@@ -70,11 +60,8 @@ export function useCheckout() {
         currency,
         intent_id: id,
         client_secret: client_secret,
-        appearance: {
-          mode: 'light',
-        },
+        appearance: { mode: 'light' },
         successUrl: `${window.location.origin}/`,
-        cancelUrl: `${window.location.origin}/`,
       });
     } catch (err: any) {
       console.error('Checkout error:', err);

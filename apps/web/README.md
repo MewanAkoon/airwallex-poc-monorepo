@@ -5,11 +5,13 @@ Next.js frontend for the bookstore POC.
 ## Setup
 
 1. Install dependencies (from root):
+
 ```bash
 pnpm install
 ```
 
 2. Create `.env.local` file:
+
 ```env
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 ```

@@ -35,20 +35,17 @@ interface ShippingAddressFormProps {
   isLoading?: boolean;
 }
 
-export function ShippingAddressForm({
-  onSubmit,
-  isLoading = false,
-}: ShippingAddressFormProps) {
+export function ShippingAddressForm({ onSubmit, isLoading = false }: ShippingAddressFormProps) {
   const form = useForm<ShippingAddress>({
     resolver: zodResolver(shippingAddressSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
       email: '',
-      address: '123 Main Street',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001',
+      address: '456 Oak Avenue',
+      city: 'Los Angeles',
+      state: 'CA',
+      zipCode: '90001',
       country: 'US',
     },
   });
@@ -58,7 +55,8 @@ export function ShippingAddressForm({
       <CardHeader>
         <CardTitle>Shipping Address</CardTitle>
         <CardDescription>
-          Enter your shipping details to calculate shipping costs
+          Enter your address to calculate tax and see your total. Shipping cost will use book weight
+          when implemented.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -114,7 +112,7 @@ export function ShippingAddressForm({
                 <FormItem>
                   <FormLabel>Address *</FormLabel>
                   <FormControl>
-                    <Input placeholder="123 Main St" {...field} />
+                    <Input placeholder="456 Oak Ave" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +127,7 @@ export function ShippingAddressForm({
                   <FormItem>
                     <FormLabel>City *</FormLabel>
                     <FormControl>
-                      <Input placeholder="New York" {...field} />
+                      <Input placeholder="Los Angeles" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,7 +140,7 @@ export function ShippingAddressForm({
                   <FormItem>
                     <FormLabel>State *</FormLabel>
                     <FormControl>
-                      <Input placeholder="NY" {...field} />
+                      <Input placeholder="CA" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -158,7 +156,7 @@ export function ShippingAddressForm({
                   <FormItem>
                     <FormLabel>Zip Code *</FormLabel>
                     <FormControl>
-                      <Input placeholder="10001" {...field} />
+                      <Input placeholder="90001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,10 +181,10 @@ export function ShippingAddressForm({
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Calculating...
+                  Applying...
                 </>
               ) : (
-                'Calculate Shipping'
+                'Apply address'
               )}
             </Button>
           </form>

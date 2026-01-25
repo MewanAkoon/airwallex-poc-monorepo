@@ -5,11 +5,13 @@ NestJS backend for Airwallex payment integration.
 ## Setup
 
 1. Install dependencies (from root):
+
 ```bash
 pnpm install
 ```
 
 2. Create `.env` file:
+
 ```env
 AIRWALLEX_CLIENT_ID=
 AIRWALLEX_API_KEY=

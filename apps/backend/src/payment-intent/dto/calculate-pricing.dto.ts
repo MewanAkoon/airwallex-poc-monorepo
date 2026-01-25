@@ -7,18 +7,14 @@ class BookDto {
   @IsString()
   @IsNotEmpty()
   id: string;
-
   @IsString()
   @IsNotEmpty()
   title: string;
-
   @IsNumber()
   price: number;
-
   @IsString()
   @IsNotEmpty()
   imageUrl: string;
-
   @IsString()
   description: string;
 }
@@ -27,12 +23,11 @@ class CartItemDto {
   @ValidateNested()
   @Type(() => BookDto)
   book: BookDto;
-
   @IsNumber()
   quantity: number;
 }
 
-export class CreatePaymentIntentDto {
+export class CalculatePricingDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CartItemDto)

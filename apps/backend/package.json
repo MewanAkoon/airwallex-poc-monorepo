@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@airwallex/node-sdk": "^2.0.0-beta.4",
+    "dotenv": "^16.4.5",
     "@poc/shared": "workspace:*",
     "@nestjs/common": "^10.3.0",
     "@nestjs/core": "^10.3.0",

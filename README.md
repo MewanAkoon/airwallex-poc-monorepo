@@ -10,6 +10,7 @@ A proof of concept demonstrating Airwallex Hosted Checkout integration in a Turb
 ### Installing Node.js
 
 If you use `nvm`:
+
 ```bash
 nvm install
 nvm use
@@ -24,6 +25,7 @@ npm install -g pnpm@10.22.0
 ## Setup
 
 1. **Install dependencies**:
+
 ```bash
 pnpm install
 ```
@@ -31,6 +33,7 @@ pnpm install
 2. **Configure environment variables**:
 
 Create `apps/backend/.env`:
+
 ```env
 AIRWALLEX_CLIENT_ID=
 AIRWALLEX_API_KEY=
@@ -42,6 +45,7 @@ PORT=3001
 ```
 
 Create `apps/web/.env.local`:
+
 ```env
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 ```
@@ -51,11 +55,13 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 ## Development
 
 Run all apps:
+
 ```bash
 pnpm dev
 ```
 
 This starts:
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001
 

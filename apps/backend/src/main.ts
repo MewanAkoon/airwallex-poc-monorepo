@@ -1,13 +1,19 @@
-import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
-import { AppModule } from "./app.module";
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load .env from backend package root (works from src/ or dist/)
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: process.env.FRONTEND_BASE_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_BASE_URL || 'http://localhost:3000',
     credentials: true,
   });
 
@@ -16,7 +22,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
-    }),
+    })
   );
 
   const port = process.env.PORT || 3001;

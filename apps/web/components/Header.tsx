@@ -30,10 +30,7 @@ export function Header() {
             <h1 className="text-xl font-bold">BookStore</h1>
           </Link>
           <Link href="/cart">
-            <Button
-              variant="secondary"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
+            <Button variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
               <ShoppingCart className="h-4 w-4 mr-2" />
               Cart {isClient && cartCount > 0 && `(${cartCount})`}
             </Button>

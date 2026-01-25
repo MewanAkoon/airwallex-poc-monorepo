@@ -34,21 +34,13 @@ export function BookCard({ book, onAddToCart }: BookCardProps) {
       </div>
       <CardHeader>
         <CardTitle className="line-clamp-2 text-lg">{book.title}</CardTitle>
-        <CardDescription className="line-clamp-3">
-          {book.description}
-        </CardDescription>
+        <CardDescription className="line-clamp-3">{book.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-primary">
-          ${book.price.toFixed(2)}
-        </div>
+        <div className="text-2xl font-bold text-primary">${book.price.toFixed(2)}</div>
       </CardContent>
       <CardFooter>
-        <Button
-          onClick={handleAddToCart}
-          className="w-full"
-          size="lg"
-        >
+        <Button onClick={handleAddToCart} className="w-full" size="lg">
           <ShoppingCart className="h-4 w-4 mr-2" />
           Add to Cart
         </Button>

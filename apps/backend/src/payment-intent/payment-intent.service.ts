@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CartItem, PricingBreakdown } from '@poc/shared';
+import { CartItem, PricingBreakdown, ShippingAddress } from '@poc/shared';
 import { QuadernoService } from '../quaderno/quaderno.service';
 import { AirwallexService } from '../airwallex/airwallex.service';
 
@@ -9,14 +9,6 @@ export interface PaymentIntentResponse {
   currency: string;
   amount: number;
   hosted_checkout_url?: string;
-}
-
-/** Address fields needed for tax and shipping. */
-export interface ShippingAddressForTax {
-  country: string;
-  zipCode: string;
-  state: string;
-  city: string;
 }
 
 @Injectable()
@@ -33,17 +25,21 @@ export class PaymentIntentService {
    */
   async calculatePricingWithTax(
     cartItems: CartItem[],
-    address: ShippingAddressForTax,
+    shippingAddress: ShippingAddress,
     shippingAmount: number = 0
   ): Promise<PricingBreakdown> {
     const subtotal = cartItems.reduce((sum, item) => sum + item.book.price * item.quantity, 0);
     const subtotalRounded = Math.round(subtotal * 100) / 100;
     const amountForTax = subtotalRounded + shippingAmount;
 
-    const { taxAmount, rate } = await this.quaderno.calculateTax(amountForTax, address);
+    const { taxAmount, rate, totalAmount } = await this.quaderno.calculateTax(
+      amountForTax,
+      shippingAddress
+    );
 
     const taxRounded = Math.round(taxAmount * 100) / 100;
-    const total = Math.round((subtotalRounded + taxRounded + shippingAmount) * 100) / 100;
+    // Use Quaderno's totalAmount (taxable amount + tax) instead of manual calculation
+    const total = Math.round(totalAmount * 100) / 100;
 
     return {
       subtotal: subtotalRounded,
@@ -79,16 +75,7 @@ export class PaymentIntentService {
   async createPaymentIntent(
     cartItems: CartItem[],
     returnUrl: string,
-    shippingAddress: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      address: string;
-      city: string;
-      state: string;
-      zipCode: string;
-      country: string;
-    }
+    shippingAddress: ShippingAddress
   ): Promise<PaymentIntentResponse> {
     if (cartItems.length === 0) {
       throw new Error('Cart cannot be empty');

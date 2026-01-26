@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
 import axios from 'axios';
-import { CartItem } from '@poc/shared';
+import { CartItem, ShippingAddress } from '@poc/shared';
 import { getAirwallexConfig } from '../config/airwallex.config';
 
 export interface CreatePaymentIntentParams {
@@ -9,16 +9,7 @@ export interface CreatePaymentIntentParams {
   currency: string;
   cartItems: CartItem[];
   returnUrl: string;
-  shippingAddress?: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
+  shippingAddress?: ShippingAddress;
 }
 
 export interface PaymentIntentData {

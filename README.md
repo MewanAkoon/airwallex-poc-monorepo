@@ -38,11 +38,7 @@ Copy `apps/backend/.env.example` to `apps/backend/.env` and set:
 - **Quaderno** (optional): `QUADERNO_API_KEY`, `QUADERNO_API_BASE_URL`, `QUADERNO_FROM_COUNTRY`, `QUADERNO_FROM_POSTAL_CODE`. If `QUADERNO_API_KEY` is empty, a flat 10% tax fallback is used.
 - **App**: `FRONTEND_BASE_URL`, `WEBHOOK_URL`, `PORT`.
 
-Create `apps/web/.env.local`:
-
-```env
-NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
-```
+Copy `apps/web/.env.example` to `apps/web/.env.local` and adjust if needed (e.g. `NEXT_PUBLIC_BACKEND_URL`).
 
 ## Development
 

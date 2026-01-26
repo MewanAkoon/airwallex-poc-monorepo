@@ -10,11 +10,7 @@ Next.js frontend for the bookstore POC.
 pnpm install
 ```
 
-2. Create `.env.local`:
-
-```env
-NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
-```
+2. Copy `.env.example` to `.env.local` and adjust if needed (e.g. `NEXT_PUBLIC_BACKEND_URL`).
 
 ## Development
 

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { CartItem } from '@poc/shared';
 import { init } from '@airwallex/components-sdk';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { markCheckoutReturn } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { ShippingAddress } from '@/components/ShippingAddressForm';
+import { getAirwallexEnv } from '@/lib/utils';
 
 export function useCheckout() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -27,11 +27,6 @@ export function useCheckout() {
     setIsProcessing(true);
 
     try {
-      await init({
-        env: 'demo',
-        enabledElements: ['payments'],
-      });
-
       const response = await fetch(API_ENDPOINTS.PAYMENT_INTENT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,12 +41,9 @@ export function useCheckout() {
       const intent = await response.json();
       const { id, client_secret, currency } = intent;
 
-      // Mark that we're going to checkout (for cart clearing on return)
-      markCheckoutReturn();
-
       // Redirect to Hosted Checkout
       const { payments } = await init({
-        env: 'demo',
+        env: getAirwallexEnv(),
         enabledElements: ['payments'],
       });
 

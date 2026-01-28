@@ -21,22 +21,25 @@ export interface PaymentIntentData {
 
 @Injectable()
 export class AirwallexService {
-  /**
-   * Create a payment intent. Uses dummy API when configured, otherwise
-   * real Airwallex API with authentication.
-   */
-  async createPaymentIntent(params: CreatePaymentIntentParams): Promise<PaymentIntentData> {
-    const config = getAirwallexConfig();
+  /** Get the API token for the Airwallex API. */
+  private async getApiToken(config = getAirwallexConfig()): Promise<string> {
+    const authResponse = await axios.post(
+      `${config.apiBaseUrl}/api/v1/authentication/login`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'x-client-id': config.clientId!,
+          'x-api-key': config.apiKey!,
+        },
+      }
+    );
 
-    if (config.useDummyApi) {
-      console.log('Using dummy API (no authentication)');
-      return this.createDummy(params);
-    }
-
-    console.log('Using real Airwallex API (with authentication)');
-    return this.createReal(params);
+    return authResponse.data.token;
   }
 
+  /** Build the order payload for payment intent creation. */
   private buildOrderPayload(
     amount: number,
     currency: string,
@@ -82,9 +85,11 @@ export class AirwallexService {
     return payload;
   }
 
-  private async createDummy(params: CreatePaymentIntentParams): Promise<PaymentIntentData> {
+  /** Create a payment intent using the Airwallex API. */
+  async createPaymentIntent(params: CreatePaymentIntentParams): Promise<PaymentIntentData> {
     const { amount, currency, cartItems, returnUrl, shippingAddress } = params;
     const config = getAirwallexConfig();
+    const token = await this.getApiToken(config);
 
     const payload = this.buildOrderPayload(amount, currency, cartItems, shippingAddress);
     (payload as Record<string, unknown>).return_url = returnUrl;
@@ -96,43 +101,10 @@ export class AirwallexService {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       }
     );
-
-    return response.data;
-  }
-
-  private async createReal(params: CreatePaymentIntentParams): Promise<PaymentIntentData> {
-    const { amount, currency, cartItems, returnUrl, shippingAddress } = params;
-    const config = getAirwallexConfig();
-
-    const authResponse = await axios.post(
-      `${config.apiBaseUrl.replace('demo-pacheckoutdemo', 'api-demo')}/api/v1/authentication/login`,
-      {},
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'x-client-id': config.clientId!,
-          'x-api-key': config.apiKey!,
-        },
-      }
-    );
-
-    const token = authResponse.data.token;
-
-    const payload = this.buildOrderPayload(amount, currency, cartItems, shippingAddress);
-    (payload as Record<string, unknown>).return_url = returnUrl;
-
-    const pciApiUrl = config.apiBaseUrl.replace('demo-pacheckoutdemo', 'pci-api-demo');
-    const response = await axios.post(`${pciApiUrl}/api/v1/pa/payment_intents/create`, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
 
     return response.data;
   }

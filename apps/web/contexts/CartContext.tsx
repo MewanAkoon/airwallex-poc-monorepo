@@ -14,7 +14,6 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'bookstore-cart';
-const CHECKOUT_RETURN_KEY = 'checkout-return';
 
 // Load cart from localStorage synchronously (client-side only)
 function loadCartFromStorage(): CartItem[] {
@@ -46,12 +45,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart(loadedCart);
     setIsHydrated(true);
 
-    // Check if returning from checkout and clear cart if so
-    const returningFromCheckout = sessionStorage.getItem(CHECKOUT_RETURN_KEY);
-    if (returningFromCheckout === 'true') {
+    // Clear cart only when returning from successful payment (URL has intent id + type=SUCCESS_URL)
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    if (params.get('id') && params.get('type') === 'SUCCESS_URL') {
       setCart([]);
       localStorage.removeItem(CART_STORAGE_KEY);
-      sessionStorage.removeItem(CHECKOUT_RETURN_KEY);
     }
   }, []);
 
@@ -113,11 +111,4 @@ export function useCart() {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-}
-
-// Helper function to mark checkout return
-export function markCheckoutReturn() {
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem(CHECKOUT_RETURN_KEY, 'true');
-  }
 }

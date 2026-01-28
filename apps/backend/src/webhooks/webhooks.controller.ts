@@ -1,5 +1,6 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { WebhooksService } from './webhooks.service';
+import { WebhookSignatureGuard } from './webhook-signature.guard';
 
 @Controller('webhooks')
 export class WebhooksController {
@@ -7,7 +8,8 @@ export class WebhooksController {
 
   @Post('airwallex')
   @HttpCode(HttpStatus.OK)
-  async handleAirwallexWebhook(@Body() payload: any) {
+  @UseGuards(WebhookSignatureGuard)
+  async handleAirwallexWebhook(@Body() payload: Record<string, unknown>) {
     this.webhooksService.handleWebhook(payload);
     return { received: true };
   }

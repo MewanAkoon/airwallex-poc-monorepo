@@ -1,30 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import type { AirwallexWebhookPayload } from './webhook.types';
 
 @Injectable()
 export class WebhooksService {
-  handleWebhook(payload: any): void {
-    const eventType = payload.type || payload.event_type;
+  handleWebhook(payload: AirwallexWebhookPayload | Record<string, unknown>): void {
+    const p = payload as Record<string, unknown>;
+    const eventName = p.name;
+    const id = p.id;
+    const accountId = p.account_id;
+    const createdAt = p.created_at;
+    const version = p.version;
 
-    console.log('=== Airwallex Webhook Received ===');
-    console.log('Event Type:', eventType);
-    console.log('Full Payload:', JSON.stringify(payload, null, 2));
-    console.log('==================================');
-
-    // Handle specific event types
-    if (eventType === 'payment_intent.succeeded' || payload.type === 'payment_intent.succeeded') {
-      console.log('✅ Payment Intent Succeeded');
-      console.log('Payment Intent ID:', payload.data?.id || payload.object?.id);
-      console.log('Amount:', payload.data?.amount || payload.object?.amount);
-      console.log('Currency:', payload.data?.currency || payload.object?.currency);
-    } else if (eventType === 'payment_intent.failed' || payload.type === 'payment_intent.failed') {
-      console.log('❌ Payment Intent Failed');
-      console.log('Payment Intent ID:', payload.data?.id || payload.object?.id);
-      console.log(
-        'Failure Reason:',
-        payload.data?.failure_reason || payload.object?.failure_reason
-      );
-    } else {
-      console.log('ℹ️  Other event type:', eventType);
-    }
+    console.log('=== Airwallex Webhook ===');
+    console.log('Event:', eventName ?? '(unknown)');
+    console.log('ID:', id ?? '-');
+    console.log('Account ID:', accountId ?? '-');
+    console.log('Created at:', createdAt ?? '-');
+    if (version != null) console.log('Version:', version);
+    console.log('--- Full payload ---');
+    console.log(JSON.stringify(payload, null, 2));
+    console.log('=====================');
   }
 }

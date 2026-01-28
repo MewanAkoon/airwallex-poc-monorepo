@@ -16,7 +16,6 @@ export interface PaymentIntentData {
   id: string;
   client_secret: string;
   currency: string;
-  hosted_checkout_url?: string;
 }
 
 @Injectable()

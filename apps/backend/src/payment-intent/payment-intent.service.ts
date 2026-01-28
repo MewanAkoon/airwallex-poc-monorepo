@@ -8,7 +8,6 @@ export interface PaymentIntentResponse {
   client_secret: string;
   currency: string;
   amount: number;
-  hosted_checkout_url?: string;
 }
 
 @Injectable()
@@ -98,7 +97,6 @@ export class PaymentIntentService {
       client_secret: intentData.client_secret,
       currency: intentData.currency || currency,
       amount: pricing.total,
-      hosted_checkout_url: intentData.hosted_checkout_url,
     };
   }
 }

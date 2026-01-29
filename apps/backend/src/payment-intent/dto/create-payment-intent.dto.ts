@@ -1,7 +1,32 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { CartItem } from '@poc/shared';
 import { ShippingAddressDto } from './shipping-address.dto';
+
+class PricingDto {
+  @IsNumber()
+  subtotal: number;
+
+  @IsNumber()
+  tax: number;
+
+  @IsNumber()
+  shipping: number;
+
+  @IsNumber()
+  total: number;
+
+  @IsNumber()
+  @IsOptional()
+  taxRate?: number;
+}
 
 class BookDto {
   @IsString()
@@ -41,4 +66,10 @@ export class CreatePaymentIntentDto {
   @ValidateNested()
   @Type(() => ShippingAddressDto)
   shippingAddress: ShippingAddressDto;
+
+  /** When provided (from cart page), used so checkout shows the same amounts as cart. */
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PricingDto)
+  pricing?: PricingDto;
 }

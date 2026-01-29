@@ -99,7 +99,7 @@ export default function CartPage() {
             cart={cart}
             pricing={pricing}
             isLoading={isLoadingPricing}
-            onCheckout={() => handleCheckout(cart, shippingAddress)}
+            onCheckout={() => handleCheckout(cart, shippingAddress, pricing)}
             isProcessing={isProcessing}
             hasShippingAddress={shippingAddress !== null}
           />

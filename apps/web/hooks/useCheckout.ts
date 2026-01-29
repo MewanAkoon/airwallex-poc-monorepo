@@ -1,15 +1,27 @@
 import { useState } from 'react';
-import { CartItem } from '@poc/shared';
-import { init } from '@airwallex/components-sdk';
+import { useRouter } from 'next/navigation';
+import { CartItem, PricingBreakdown } from '@poc/shared';
 import { API_ENDPOINTS } from '@/lib/constants';
 import { toast } from 'sonner';
 import { ShippingAddress } from '@/components/ShippingAddressForm';
-import { getAirwallexEnv } from '@/lib/utils';
+
+const CHECKOUT_SESSION_KEY = 'checkout_session';
+
+export interface CheckoutSession {
+  intent: { id: string; client_secret: string; currency: string; amount: number };
+  cartItems: CartItem[];
+  pricing: { subtotal: number; shipping: number; tax: number; total: number; taxRate?: number };
+}
 
 export function useCheckout() {
+  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleCheckout = async (cart: CartItem[], shippingAddress: ShippingAddress | null) => {
+  const handleCheckout = async (
+    cart: CartItem[],
+    shippingAddress: ShippingAddress | null,
+    cartPricing?: PricingBreakdown | null
+  ) => {
     if (cart.length === 0) {
       toast.error('Cart is empty', {
         description: 'Please add items to your cart before checkout.',
@@ -27,10 +39,20 @@ export function useCheckout() {
     setIsProcessing(true);
 
     try {
+      const body: {
+        cartItems: CartItem[];
+        shippingAddress: ShippingAddress;
+        pricing?: PricingBreakdown;
+      } = {
+        cartItems: cart,
+        shippingAddress,
+      };
+      if (cartPricing != null) body.pricing = cartPricing;
+
       const response = await fetch(API_ENDPOINTS.PAYMENT_INTENT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartItems: cart, shippingAddress }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -38,23 +60,22 @@ export function useCheckout() {
         throw new Error(errorData.error || 'Failed to create payment intent');
       }
 
-      const intent = await response.json();
-      const { id, client_secret, currency } = intent;
+      const data = await response.json();
+      const { id, client_secret, currency, amount, cartItems, pricing } = data;
 
-      // Redirect to Hosted Checkout
-      const { payments } = await init({
-        env: getAirwallexEnv(),
-        enabledElements: ['payments'],
-      });
+      const session: CheckoutSession = {
+        intent: { id, client_secret, currency, amount },
+        cartItems: cartItems ?? cart,
+        pricing: pricing ?? {
+          subtotal: cart.reduce((s, i) => s + i.book.price * i.quantity, 0),
+          shipping: 0,
+          tax: 0,
+          total: amount,
+        },
+      };
 
-      payments?.redirectToCheckout({
-        mode: 'payment',
-        currency,
-        intent_id: id,
-        client_secret: client_secret,
-        appearance: { mode: 'light' },
-        successUrl: `${window.location.origin}/`,
-      });
+      sessionStorage.setItem(`${CHECKOUT_SESSION_KEY}_${id}`, JSON.stringify(session));
+      router.replace(`/checkout?intent_id=${encodeURIComponent(id)}`);
     } catch (err: any) {
       console.error('Checkout error:', err);
       toast.error('Checkout failed', {
@@ -65,4 +86,20 @@ export function useCheckout() {
   };
 
   return { handleCheckout, isProcessing };
+}
+
+export function getCheckoutSession(intentId: string): CheckoutSession | null {
+  if (typeof window === 'undefined') return null;
+  const raw = sessionStorage.getItem(`${CHECKOUT_SESSION_KEY}_${intentId}`);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as CheckoutSession;
+  } catch {
+    return null;
+  }
+}
+
+export function clearCheckoutSession(intentId: string): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(`${CHECKOUT_SESSION_KEY}_${intentId}`);
 }

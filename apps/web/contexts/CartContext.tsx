@@ -45,9 +45,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart(loadedCart);
     setIsHydrated(true);
 
-    // Clear cart only when returning from successful payment (URL has intent id + type=SUCCESS_URL)
+    // Clear cart when returning from successful payment
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    if (params.get('id') && params.get('type') === 'SUCCESS_URL') {
+    const fromHostedSuccess = params.get('id') && params.get('type') === 'SUCCESS_URL';
+    const fromDropinSuccess = params.get('payment') === 'success';
+    if (fromHostedSuccess || fromDropinSuccess) {
       setCart([]);
       localStorage.removeItem(CART_STORAGE_KEY);
     }

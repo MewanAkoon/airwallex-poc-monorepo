@@ -8,6 +8,8 @@ export interface PaymentIntentResponse {
   client_secret: string;
   currency: string;
   amount: number;
+  cartItems: CartItem[];
+  pricing: PricingBreakdown;
 }
 
 @Injectable()
@@ -68,21 +70,27 @@ export class PaymentIntentService {
   }
 
   /**
-   * Create payment intent. Requires shipping address. Backend computes shipping
-   * (via calculateShipping) and tax (via Quaderno or fallback).
+   * Create payment intent. When pricing is provided (from cart page), use it so checkout shows
+   * the same amounts. Otherwise compute shipping and tax on the backend.
    */
   async createPaymentIntent(
     cartItems: CartItem[],
     returnUrl: string,
-    shippingAddress: ShippingAddress
+    shippingAddress: ShippingAddress,
+    pricingFromCart?: PricingBreakdown
   ): Promise<PaymentIntentResponse> {
     if (cartItems.length === 0) {
       throw new Error('Cart cannot be empty');
     }
 
-    const shippingAmount = this.calculateShipping(shippingAddress);
-    const pricing = await this.calculatePricingWithTax(cartItems, shippingAddress, shippingAmount);
     const currency = 'USD';
+    const pricing =
+      pricingFromCart != null
+        ? pricingFromCart
+        : await (async () => {
+            const shippingAmount = this.calculateShipping(shippingAddress);
+            return this.calculatePricingWithTax(cartItems, shippingAddress, shippingAmount);
+          })();
 
     const intentData = await this.airwallex.createPaymentIntent({
       amount: pricing.total,
@@ -90,6 +98,8 @@ export class PaymentIntentService {
       cartItems,
       returnUrl,
       shippingAddress,
+      shippingAmount: pricing.shipping,
+      taxAmount: pricing.tax,
     });
 
     return {
@@ -97,6 +107,8 @@ export class PaymentIntentService {
       client_secret: intentData.client_secret,
       currency: intentData.currency || currency,
       amount: pricing.total,
+      cartItems,
+      pricing,
     };
   }
 }

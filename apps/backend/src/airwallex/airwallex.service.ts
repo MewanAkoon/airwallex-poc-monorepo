@@ -10,6 +10,10 @@ export interface CreatePaymentIntentParams {
   cartItems: CartItem[];
   returnUrl: string;
   shippingAddress?: ShippingAddress;
+  /** Shipping fee amount; sent as order.shipping.fee_amount on the payment intent. */
+  shippingAmount?: number;
+  /** Tax amount; sent as a product line in order.products so it appears in the intent. */
+  taxAmount?: number;
 }
 
 export interface PaymentIntentData {
@@ -43,9 +47,36 @@ export class AirwallexService {
     amount: number,
     currency: string,
     cartItems: CartItem[],
-    shippingAddress?: CreatePaymentIntentParams['shippingAddress']
+    options: {
+      shippingAddress?: CreatePaymentIntentParams['shippingAddress'];
+      shippingAmount?: number;
+      taxAmount?: number;
+    } = {}
   ): Record<string, unknown> {
     const merchantOrderId = `ORD-${Date.now()}-${uuid().substring(0, 8).toUpperCase()}`;
+    const { shippingAddress, shippingAmount = 0, taxAmount = 0 } = options;
+
+    const products: Array<Record<string, unknown>> = cartItems.map((item) => ({
+      image_url: item.book.imageUrl,
+      url: item.book.imageUrl,
+      name: item.book.title,
+      desc: `Book: ${item.book.title}`,
+      unit_price: item.book.price.toFixed(2),
+      currency,
+      quantity: item.quantity,
+    }));
+
+    if (taxAmount > 0) {
+      products.push({
+        name: 'Tax',
+        desc: 'Tax',
+        image_url: '',
+        url: '',
+        unit_price: taxAmount.toFixed(2),
+        currency,
+        quantity: 1,
+      });
+    }
 
     const payload: Record<string, unknown> = {
       request_id: uuid(),
@@ -53,20 +84,12 @@ export class AirwallexService {
       amount: amount.toFixed(2),
       currency,
       order: {
-        products: cartItems.map((item) => ({
-          image_url: item.book.imageUrl,
-          url: item.book.imageUrl,
-          name: item.book.title,
-          desc: `Book: ${item.book.title}`,
-          unit_price: item.book.price.toFixed(2),
-          currency,
-          quantity: item.quantity,
-        })),
+        products,
       },
     };
 
     if (shippingAddress) {
-      (payload.order as Record<string, unknown>).shipping = {
+      const shipping: Record<string, unknown> = {
         address: {
           city: shippingAddress.city,
           country_code: shippingAddress.country,
@@ -79,6 +102,10 @@ export class AirwallexService {
         phone_number: '',
         shipping_method: 'Standard',
       };
+      if (shippingAmount > 0) {
+        shipping.fee_amount = shippingAmount.toFixed(2);
+      }
+      (payload.order as Record<string, unknown>).shipping = shipping;
     }
 
     return payload;
@@ -86,11 +113,16 @@ export class AirwallexService {
 
   /** Create a payment intent using the Airwallex API. */
   async createPaymentIntent(params: CreatePaymentIntentParams): Promise<PaymentIntentData> {
-    const { amount, currency, cartItems, returnUrl, shippingAddress } = params;
+    const { amount, currency, cartItems, returnUrl, shippingAddress, shippingAmount, taxAmount } =
+      params;
     const config = getAirwallexConfig();
     const token = await this.getApiToken(config);
 
-    const payload = this.buildOrderPayload(amount, currency, cartItems, shippingAddress);
+    const payload = this.buildOrderPayload(amount, currency, cartItems, {
+      shippingAddress,
+      shippingAmount,
+      taxAmount,
+    });
     (payload as Record<string, unknown>).return_url = returnUrl;
 
     const response = await axios.post(

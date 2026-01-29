@@ -59,7 +59,8 @@ export class PaymentIntentController {
       const result = await this.paymentIntentService.createPaymentIntent(
         dto.cartItems,
         returnUrl,
-        dto.shippingAddress
+        dto.shippingAddress,
+        dto.pricing
       );
 
       return result;

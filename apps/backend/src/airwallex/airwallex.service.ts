@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
-import axios from 'axios';
+import {
+  Airwallex,
+  ApiError,
+  type PaymentAcceptancePaymentIntentCreateRequestRaw,
+  type PaymentAcceptancePurchaseOrderCreate,
+  type PaymentAcceptanceProduct,
+  type PaymentAcceptanceShippingCreate,
+} from '@airwallex/node-sdk';
 import { CartItem, ShippingAddress } from '@poc/shared';
 import { getAirwallexConfig } from '../config/airwallex.config';
 
@@ -24,45 +31,44 @@ export interface PaymentIntentData {
 
 @Injectable()
 export class AirwallexService {
-  /** Get the API token for the Airwallex API. */
-  private async getApiToken(config = getAirwallexConfig()): Promise<string> {
-    const authResponse = await axios.post(
-      `${config.apiBaseUrl}/api/v1/authentication/login`,
-      {},
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'x-client-id': config.clientId!,
-          'x-api-key': config.apiKey!,
-        },
-      }
-    );
+  private client: Airwallex | null = null;
 
-    return authResponse.data.token;
+  /** Lazy-initialized Airwallex SDK client. Handles auth (login/token refresh) internally. */
+  private getClient(): Airwallex {
+    if (!this.client) {
+      const config = getAirwallexConfig();
+      if (!config.clientId || !config.apiKey) {
+        throw new Error(
+          'Airwallex credentials missing: set AIRWALLEX_CLIENT_ID and AIRWALLEX_API_KEY'
+        );
+      }
+      this.client = new Airwallex({
+        clientId: config.clientId,
+        apiKey: config.apiKey,
+        env: config.env,
+        apiVersion: '2025-02-14',
+      });
+    }
+    return this.client;
   }
 
-  /** Build the order payload for payment intent creation. */
-  private buildOrderPayload(
-    amount: number,
-    currency: string,
+  /** Build order payload for payment intent creation using SDK types. */
+  private buildOrder(
     cartItems: CartItem[],
     options: {
       shippingAddress?: CreatePaymentIntentParams['shippingAddress'];
       shippingAmount?: number;
       taxAmount?: number;
     } = {}
-  ): Record<string, unknown> {
-    const merchantOrderId = `ORD-${Date.now()}-${uuid().substring(0, 8).toUpperCase()}`;
+  ): PaymentAcceptancePurchaseOrderCreate {
     const { shippingAddress, shippingAmount = 0, taxAmount = 0 } = options;
 
-    const products: Array<Record<string, unknown>> = cartItems.map((item) => ({
+    const products: PaymentAcceptanceProduct[] = cartItems.map((item) => ({
       image_url: item.book.imageUrl,
       url: item.book.imageUrl,
       name: item.book.title,
       desc: `Book: ${item.book.title}`,
-      unit_price: item.book.price.toFixed(2),
-      currency,
+      unit_price: Number(item.book.price.toFixed(2)),
       quantity: item.quantity,
     }));
 
@@ -72,24 +78,17 @@ export class AirwallexService {
         desc: 'Tax',
         image_url: '',
         url: '',
-        unit_price: taxAmount.toFixed(2),
-        currency,
+        unit_price: Number(taxAmount.toFixed(2)),
         quantity: 1,
       });
     }
 
-    const payload: Record<string, unknown> = {
-      request_id: uuid(),
-      merchant_order_id: merchantOrderId,
-      amount: amount.toFixed(2),
-      currency,
-      order: {
-        products,
-      },
+    const order: PaymentAcceptancePurchaseOrderCreate = {
+      products,
     };
 
     if (shippingAddress) {
-      const shipping: Record<string, unknown> = {
+      const shipping: PaymentAcceptanceShippingCreate = {
         address: {
           city: shippingAddress.city,
           country_code: shippingAddress.country,
@@ -103,40 +102,60 @@ export class AirwallexService {
         shipping_method: 'Standard',
       };
       if (shippingAmount > 0) {
-        shipping.fee_amount = shippingAmount.toFixed(2);
+        shipping.fee_amount = Number(shippingAmount.toFixed(2));
       }
-      (payload.order as Record<string, unknown>).shipping = shipping;
+      order.shipping = shipping;
     }
 
-    return payload;
+    return order;
   }
 
-  /** Create a payment intent using the Airwallex API. */
+  /** Create a payment intent using the Airwallex Node SDK. */
   async createPaymentIntent(params: CreatePaymentIntentParams): Promise<PaymentIntentData> {
     const { amount, currency, cartItems, returnUrl, shippingAddress, shippingAmount, taxAmount } =
       params;
-    const config = getAirwallexConfig();
-    const token = await this.getApiToken(config);
 
-    const payload = this.buildOrderPayload(amount, currency, cartItems, {
+    const merchantOrderId = `ORD-${Date.now()}-${uuid().substring(0, 8).toUpperCase()}`;
+    const order = this.buildOrder(cartItems, {
       shippingAddress,
       shippingAmount,
       taxAmount,
     });
-    (payload as Record<string, unknown>).return_url = returnUrl;
 
-    const response = await axios.post(
-      `${config.apiBaseUrl}/api/v1/pa/payment_intents/create`,
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+    const request: PaymentAcceptancePaymentIntentCreateRequestRaw = {
+      request_id: uuid(),
+      amount: Number(amount.toFixed(2)),
+      currency,
+      merchant_order_id: merchantOrderId,
+      return_url: returnUrl,
+      descriptor: 'Bookstore Order',
+      order,
+    };
+
+    try {
+      const response =
+        await this.getClient().paymentAcceptance.paymentIntents.createPaymentIntent(request);
+
+      const id = response.id;
+      const client_secret = response.client_secret;
+      const responseCurrency = response.currency ?? currency;
+
+      if (!id || !client_secret) {
+        throw new Error('Airwallex create payment intent response missing id or client_secret');
       }
-    );
 
-    return response.data;
+      return {
+        id,
+        client_secret,
+        currency: responseCurrency,
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(
+          `Airwallex API error (${error.status}): ${JSON.stringify(error.data ?? error.message)}`
+        );
+      }
+      throw error;
+    }
   }
 }

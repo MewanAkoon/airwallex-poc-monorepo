@@ -21,8 +21,8 @@ importers:
   apps/backend:
     dependencies:
       '@airwallex/node-sdk':
-        specifier: ^2.0.0-beta.4
-        version: 2.0.0-beta.4
+        specifier: 2.1.0-beta.5
+        version: 2.1.0-beta.5
       '@nestjs/common':
         specifier: ^10.3.0
         version: 10.4.22(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -178,6 +178,9 @@ importers:
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
+      prettier:
+        specifier: ^3.2.4
+        version: 3.8.1
       tailwindcss:
         specifier: ^3.4.1
         version: 3.4.19
@@ -187,6 +190,9 @@ importers:
 
   packages/shared:
     devDependencies:
+      prettier:
+        specifier: ^3.2.4
+        version: 3.8.1
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -199,8 +205,8 @@ packages:
   '@airwallex/components-sdk@1.28.2':
     resolution: {integrity: sha512-LK8g/SLTuOhX+CPFRFwPf8Tx4H2LGjMSGZx5B9wbGVLLzE9ZnLCKgkBeG0LRvCF6E/DdI8+ybuU5d2AyInl6MA==}
 
-  '@airwallex/node-sdk@2.0.0-beta.4':
-    resolution: {integrity: sha512-2yQt82LZyuurjcohgiQRrRKy2JtpYyZpPP0DXnKKQyNJSaXyaWr41vceJ6tTAr9Jgp4uVrigtbMhzmehBHUang==}
+  '@airwallex/node-sdk@2.1.0-beta.5':
+    resolution: {integrity: sha512-yQ1OSBV/4c6PotmtOQSgRm3WDELK8UwMiykhJUoub14Vw/F8sUwGSDwpZu7YavBGD9CG8ZT5idkqS59Nq4k5Bw==}
     engines: {node: '>=14.0.0'}
 
   '@alloc/quick-lru@5.2.0':
@@ -3303,7 +3309,7 @@ snapshots:
     dependencies:
       '@airwallex/airtracker': 3.2.0
 
-  '@airwallex/node-sdk@2.0.0-beta.4':
+  '@airwallex/node-sdk@2.1.0-beta.5':
     dependencies:
       async-mutex: 0.5.0
       axios: 1.13.2
@@ -4768,7 +4774,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1)
@@ -4798,7 +4804,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -4813,7 +4819,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
